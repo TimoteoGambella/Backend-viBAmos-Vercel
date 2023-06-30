@@ -79,6 +79,21 @@ app.post("/api/getUser",(req,res)=>{
         })
     )
 })
+app.post("/api/getUserByMail",(req,res)=>{
+
+    Usuarios.find({mail:req.body.mail}
+        .then(doc=>{
+            if(doc.length!==0){
+                res.json({response:"success",data:doc,message:"Usuario encontrado"})
+            }else{
+                res.json({response:"failed",data:doc,message:"Usuario no encontrado"}) 
+            }
+        })
+        .catch(err=>{
+            res.json({response:"failed",data:doc})
+        })
+    )
+})
 
 app.post("/api/login", (req,res)=>{
 
