@@ -99,10 +99,13 @@ app.post("/api/login", (req,res)=>{
 
     Usuarios.find({
         mail:req.body.mail,
-        password:req.body.password
     }).then(doc=>{
         if(doc.length!==0){
-            res.json({response:"success",data:doc,message:"Usuario encontrado"})
+            if(doc.password===req.body.password){
+                res.json({response:"success",data:doc,message:"Usuario encontrado"})
+            }else{
+                res.json({response:"failed",data:doc,message:"Contraseña incorrecta"}) 
+            }
         }else{
             res.json({response:"failed",data:doc,message:"Usuario no encontrado"}) 
         }
