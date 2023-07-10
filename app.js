@@ -101,7 +101,7 @@ app.post("/api/login", (req,res)=>{
         mail:req.body.mail,
     }).then(doc=>{
         if(doc.length!==0){
-            if(doc.password===req.body.password){
+            if(doc[0].password===req.body.password){
                 res.json({response:"success",data:doc,message:"Usuario encontrado"})
             }else{
                 res.json({response:"failed",data:[],message:"Contraseña incorrecta"}) 
