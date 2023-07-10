@@ -104,10 +104,10 @@ app.post("/api/login", (req,res)=>{
             if(doc.password===req.body.password){
                 res.json({response:"success",data:doc,message:"Usuario encontrado"})
             }else{
-                res.json({response:"failed",data:doc,message:"Contraseña incorrecta"}) 
+                res.json({response:"failed",data:[],message:"Contraseña incorrecta"}) 
             }
         }else{
-            res.json({response:"failed",data:doc,message:"Usuario no encontrado"}) 
+            res.json({response:"failed",data:[],message:"Usuario no encontrado"}) 
         }
     })
     .catch(err=>{
