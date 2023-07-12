@@ -64,7 +64,7 @@ app.post("/api/getAllUsers",(req,res)=>{
 })
 
 app.get("/api/getUser",(req,res)=>{
-    let userId = "649d9cc2e7bcba5fe85439e2"
+    let userId = CryptoJS.AES.decrypt(req.body.id, "clave_secreta").toString(CryptoJS.enc.Utf8)
 
     Usuarios.find({_id:userId})
     .then(doc=>{
@@ -80,18 +80,17 @@ app.get("/api/getUser",(req,res)=>{
 })
 app.post("/api/getUserByMail",(req,res)=>{
 
-    Usuarios.find({mail:req.body.mail}
-        .then(doc=>{
-            if(doc.length!==0){
-                res.json({response:"success",data:doc,message:"Usuario encontrado"})
-            }else{
-                res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
-            }
-        })
-        .catch(err=>{
-            res.json({response:"failed",data:{}})
-        })
-    )
+    Usuarios.find({mail:req.body.mail})
+    .then(doc=>{
+        if(doc.length!==0){
+            res.json({response:"success",data:doc,message:"Usuario encontrado"})
+        }else{
+            res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
+        }
+    })
+    .catch(err=>{
+        res.json({response:"failed",data:{}})
+    })
 })
 
 app.post("/api/login", (req,res)=>{
