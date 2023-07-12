@@ -66,7 +66,7 @@ app.post("/api/getAllUsers",(req,res)=>{
 app.post("/api/getUser",(req,res)=>{
     let userId = CryptoJS.AES.decrypt(req.body.id, "clave_secreta").toString(CryptoJS.enc.Utf8)
 
-    Usuarios.find({_id:userId}
+    Usuarios.find({id:userId}
         .then(doc=>{
             if(doc.length!==0){
                 res.json({response:"success",data:doc,message:"Usuario encontrado"})
