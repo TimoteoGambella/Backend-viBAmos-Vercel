@@ -53,7 +53,7 @@ const Usuarios=mongoose.model("users",{
 })
 
 const Validation=(password)=>{
-    if(process.env.PASSWORDBACK===req.body.passwordBack){
+    if(process.env.PASSWORDBACK===password.body.passwordBack){
         return true
     }else{
         return false
