@@ -53,16 +53,16 @@ const Usuarios=mongoose.model("users",{
 })
 
 const Validation=(password)=>{
-    if(process.env.PASSWORDBACK===password){
+    if(process.env.PASSWORDBACK===req.body.passwordBack){
         return true
     }else{
         return false
     }
 }
 
-app.post("/api/getAllEvents", async(req,res)=>{
-    let validation=await Validation()
-    
+app.post("/api/getAllEvents", (req,res)=>{
+    let validation=Validation(req)
+
     if(validation){
         Eventos.find({}).then(doc=>{
             res.json({response:"success",data:doc})
@@ -76,149 +76,143 @@ app.post("/api/getAllEvents", async(req,res)=>{
     
 })
 app.post("/api/getAllUsers",(req,res)=>{
-    Validation().then((res)=>{
-        if(res){
-            Usuarios.find({}).then(doc=>{
-                res.json({response:"success",data:doc})
+    let validation=Validation(req)
+
+    if(validation){
+        Usuarios.find({}).then(doc=>{
+            res.json({response:"success",data:doc})
+        })
+        .catch(err=>{
+            res.json({response:"failed",data:{},message:"Error Base de Datos"})
+        })
+    }else{
+        res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+    }
+    
+})
+
+app.post("/api/getUser",(req,res)=>{
+    let validation= Validation(req)
+    if(validation){
+        let userId = CryptoJS.AES.decrypt(req.body.id, "clave_secreta").toString(CryptoJS.enc.Utf8)
+    
+        Usuarios.find({_id:userId})
+        .then(doc=>{
+            if(doc.length!==0){
+                res.json({response:"success",data:doc,message:"Usuario encontrado"})
+            }else{
+                res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
+            }
+        })
+        .catch(err=>{
+            res.json({response:"failed",data:{}})
+        })
+    }else{
+        res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+    }
+})
+app.post("/api/getUserByMail",(req,res)=>{
+    let validation= Validation(req)
+    if(validation){
+        Usuarios.find({mail:req.body.mail})
+        .then(doc=>{
+            if(doc.length!==0){
+                res.json({response:"success",data:doc,message:"Usuario encontrado"})
+            }else{
+                res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
+            }
+        })
+        .catch(err=>{
+            res.json({response:"failed",data:{}})
+        })
+    }else{
+        res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+    }
+})
+
+app.post("/api/login", (req,res)=>{
+    let validation= Validation(req)
+    if(validation){
+        Usuarios.find({
+            mail:req.body.mail,
+        }).then(doc=>{        
+            if(doc.length!==0){
+                if(doc[0].password===req.body.password){
+                    res.json({response:"success",data:doc,message:"Usuario encontrado"})
+                }else{
+                    res.json({response:"failed",data:{},message:"Contraseña incorrecta"}) 
+                }
+            }else{
+                res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
+            }
+        })
+        .catch(err=>{
+            res.json({response:"failed",data:{}})
+        })
+    }else{
+        res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+    }
+})
+
+app.post("/api/register", (req,res)=>{
+    let validation= Validation(req)
+    if(validation){
+        if(req.body.mail && req.body.password && req.body.username){
+            Usuarios.find({
+                mail:req.body.mail,
+            }).then(doc=>{
+                if(doc.length!==0){
+                    res.json({response:"failed",data:{},message:"Mail ya registrado"})
+                }else{
+                    const user = new Usuarios({
+                        mail:req.body.mail,
+                        username:req.body.username,
+                        password:req.body.password,
+                        favs:[]
+                    })
+                    user.save().then(doc=>{
+                        res.json({response:"success",data:doc,message:"Usuario creado"})
+                    })
+                    .catch(err=>{
+                        res.status(400).json({response:"failed",data:{},message:"Ocurrió un error"})
+                    })
+                }
             })
             .catch(err=>{
                 res.json({response:"failed",data:{},message:"Error Base de Datos"})
             })
         }else{
-            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+            res.json({response:"failed",data:{},message:"Parametros incorrectos"})
         }
-    })
-})
-
-app.post("/api/getUser",(req,res)=>{
-    Validation().then((res)=>{
-        if(res){
-            let userId = CryptoJS.AES.decrypt(req.body.id, "clave_secreta").toString(CryptoJS.enc.Utf8)
-        
-            Usuarios.find({_id:userId})
-            .then(doc=>{
-                if(doc.length!==0){
-                    res.json({response:"success",data:doc,message:"Usuario encontrado"})
-                }else{
-                    res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
-                }
-            })
-            .catch(err=>{
-                res.json({response:"failed",data:{}})
-            })
-        }else{
-            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
-        }
-    })
-})
-app.post("/api/getUserByMail",(req,res)=>{
-    Validation().then((res)=>{
-        if(res){
-            Usuarios.find({mail:req.body.mail})
-            .then(doc=>{
-                if(doc.length!==0){
-                    res.json({response:"success",data:doc,message:"Usuario encontrado"})
-                }else{
-                    res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
-                }
-            })
-            .catch(err=>{
-                res.json({response:"failed",data:{}})
-            })
-        }else{
-            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
-        }
-    })
-
-})
-
-app.post("/api/login", (req,res)=>{
-    Validation().then((res)=>{
-        if(res){
-            Usuarios.find({
-                mail:req.body.mail,
-            }).then(doc=>{        
-                if(doc.length!==0){
-                    if(doc[0].password===req.body.password){
-                        res.json({response:"success",data:doc,message:"Usuario encontrado"})
-                    }else{
-                        res.json({response:"failed",data:{},message:"Contraseña incorrecta"}) 
-                    }
-                }else{
-                    res.json({response:"failed",data:{},message:"Usuario no encontrado"}) 
-                }
-            })
-            .catch(err=>{
-                res.json({response:"failed",data:{}})
-            })
-        }else{
-            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
-        }
-    })
-
-})
-
-app.post("/api/register", (req,res)=>{
-    Validation().then((res)=>{
-        if(res){
-            if(req.body.mail && req.body.password && req.body.username){
-                Usuarios.find({
-                    mail:req.body.mail,
-                }).then(doc=>{
-                    if(doc.length!==0){
-                        res.json({response:"failed",data:{},message:"Mail ya registrado"})
-                    }else{
-                        const user = new Usuarios({
-                            mail:req.body.mail,
-                            username:req.body.username,
-                            password:req.body.password,
-                            favs:[]
-                        })
-                        user.save().then(doc=>{
-                            res.json({response:"success",data:doc,message:"Usuario creado"})
-                        })
-                        .catch(err=>{
-                            res.status(400).json({response:"failed",data:{},message:"Ocurrió un error"})
-                        })
-                    }
-                })
-                .catch(err=>{
-                    res.json({response:"failed",data:{},message:"Error Base de Datos"})
-                })
-            }else{
-                res.json({response:"failed",data:{},message:"Parametros incorrectos"})
-            }
-        }else{
-            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
-        }
-    })
+    }else{
+        res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+    }
 })
 
 app.post("/api/favs", (req,res)=>{
-    Validation().then((res)=>{
-        if(res){
-            let newFavs=req.body.favs
-            // const encryptedText = CryptoJS.AES.encrypt(plainText, secretKey).toString();
-            // const decryptedText = CryptoJS.AES.decrypt(encryptedText, secretKey).toString(CryptoJS.enc.Utf8);
-        
-            let userId = CryptoJS.AES.decrypt(req.body.id, "clave_secreta").toString(CryptoJS.enc.Utf8)
-        
-            if(!Array.isArray(newFavs)){
-                res.json({response:"failed",data:{},message:"Favoritos mal enviados"})
-            }else{
-                const update = {$set:{favs:newFavs}}
-                Usuarios.findByIdAndUpdate(userId, update)
-                    .then(doc=>{
-                        res.json({response:"success",data:doc,message:"Favoritos actualizados"})
-                    })
-                    .catch(err=>{
-                        res.json({response:"failed",data:{},message:"Favoritos no actualizados"})
-                    })
-            }
+    let validation= Validation(req)
+    if(validation){
+        let newFavs=req.body.favs
+        // const encryptedText = CryptoJS.AES.encrypt(plainText, secretKey).toString();
+        // const decryptedText = CryptoJS.AES.decrypt(encryptedText, secretKey).toString(CryptoJS.enc.Utf8);
+    
+        let userId = CryptoJS.AES.decrypt(req.body.id, "clave_secreta").toString(CryptoJS.enc.Utf8)
+    
+        if(!Array.isArray(newFavs)){
+            res.json({response:"failed",data:{},message:"Favoritos mal enviados"})
         }else{
-            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+            const update = {$set:{favs:newFavs}}
+            Usuarios.findByIdAndUpdate(userId, update)
+                .then(doc=>{
+                    res.json({response:"success",data:doc,message:"Favoritos actualizados"})
+                })
+                .catch(err=>{
+                    res.json({response:"failed",data:{},message:"Favoritos no actualizados"})
+                })
         }
-    })
+    }else{
+        res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+    }
 })
 
 app.listen(3000, ()=>{
