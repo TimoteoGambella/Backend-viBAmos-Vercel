@@ -46,15 +46,36 @@ const Usuarios=mongoose.model("users",{
     favs:Array
 })
 
+const Validation=(password)=>{
+    if(process.env.PASSWORDBACK===password){
+        return true
+    }else{
+        return false
+    }
+}
+
 app.post("/api/getAllEvents",(req,res)=>{
-    Eventos.find({}).then(doc=>{
-        res.json({response:"success",data:doc})
-    })
-    .catch(err=>{
-        res.json({response:"failed",data:{},message:"Error Base de Datos"})
+    Validation(req.body.passwordBack).then((res)=>{
+        if(res){
+            Eventos.find({}).then(doc=>{
+                res.json({response:"success",data:doc})
+            })
+            .catch(err=>{
+                res.json({response:"failed",data:{},message:"Error Base de Datos"})
+            })
+        }else{
+            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+        }
     })
 })
 app.post("/api/getAllUsers",(req,res)=>{
+    Validation().then((res)=>{
+        if(res){
+
+        }else{
+
+        }
+    })
     Usuarios.find({}).then(doc=>{
         res.json({response:"success",data:doc})
     })
@@ -64,6 +85,13 @@ app.post("/api/getAllUsers",(req,res)=>{
 })
 
 app.post("/api/getUser",(req,res)=>{
+    Validation().then((res)=>{
+        if(res){
+
+        }else{
+
+        }
+    })
     let userId = CryptoJS.AES.decrypt(req.body.id, "clave_secreta").toString(CryptoJS.enc.Utf8)
 
     Usuarios.find({_id:userId})
@@ -79,6 +107,13 @@ app.post("/api/getUser",(req,res)=>{
     })
 })
 app.post("/api/getUserByMail",(req,res)=>{
+    Validation().then((res)=>{
+        if(res){
+
+        }else{
+
+        }
+    })
 
     Usuarios.find({mail:req.body.mail})
     .then(doc=>{
@@ -94,6 +129,13 @@ app.post("/api/getUserByMail",(req,res)=>{
 })
 
 app.post("/api/login", (req,res)=>{
+    Validation().then((res)=>{
+        if(res){
+
+        }else{
+
+        }
+    })
 
     Usuarios.find({
         mail:req.body.mail,
@@ -114,6 +156,13 @@ app.post("/api/login", (req,res)=>{
 })
 
 app.post("/api/register", (req,res)=>{
+    Validation().then((res)=>{
+        if(res){
+
+        }else{
+
+        }
+    })
     if(req.body.mail && req.body.password && req.body.username){
         Usuarios.find({
             mail:req.body.mail,
@@ -144,6 +193,13 @@ app.post("/api/register", (req,res)=>{
 })
 
 app.post("/api/favs", (req,res)=>{
+    Validation().then((res)=>{
+        if(res){
+
+        }else{
+
+        }
+    })
     let newFavs=req.body.favs
     // const encryptedText = CryptoJS.AES.encrypt(plainText, secretKey).toString();
     // const decryptedText = CryptoJS.AES.decrypt(encryptedText, secretKey).toString(CryptoJS.enc.Utf8);
