@@ -60,19 +60,20 @@ const Validation=(password)=>{
     }
 }
 
-app.post("/api/getAllEvents",(req,res)=>{
-    Validation(req.body.passwordBack).then((res)=>{
-        if(res){
-            Eventos.find({}).then(doc=>{
-                res.json({response:"success",data:doc})
-            })
-            .catch(err=>{
-                res.json({response:"failed",data:{},message:"Error Base de Datos"})
-            })
-        }else{
-            res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
-        }
-    })
+app.post("/api/getAllEvents", async(req,res)=>{
+    let validation=await Validation()
+    
+    if(validation){
+        Eventos.find({}).then(doc=>{
+            res.json({response:"success",data:doc})
+        })
+        .catch(err=>{
+            res.json({response:"failed",data:{},message:"Error Base de Datos"})
+        })
+    }else{
+        res.json({response:"failed",data:{},message:"Contraseña incorrecta"})
+    }
+    
 })
 app.post("/api/getAllUsers",(req,res)=>{
     Validation().then((res)=>{
